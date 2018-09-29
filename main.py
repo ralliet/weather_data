@@ -54,6 +54,8 @@ def transform():
     # write to csv file
     df_weather.to_csv(r'data\output\weather.csv', sep=',', encoding='utf-8', index=False)
 
+    # remove all gzip files
+    os.remove(r'data\output\weather_temp.csv')
 
 if __name__ == '__main__':
     start_year = 1820
