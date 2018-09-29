@@ -49,6 +49,9 @@ def transform():
     df_weather = df_weather[df_weather.value_type == "TMIN"]
     # sort by date
     df_weather.sort_values(by=['date'])
+
+    df_weather['date'] = pd.to_datetime(df_weather['date'].astype(str), format='%Y-%m')
+
     # select columns country,date and value
     df_weather = df_weather[['country', 'date','value']]
     # write to csv file
