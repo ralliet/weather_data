@@ -13,7 +13,7 @@ This script downloads all .gz weather files from a data range that can be set in
 
 Execute the following command to get the right package dependencies
 ```
-pip install -r requirements.txt
+pipenv install
 ```
 Also make sure you are using Python version: 3.6.5
 
