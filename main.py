@@ -5,6 +5,8 @@ import shutil
 import os
 import glob  # read all files from specific dir
 import pandas as pd
+import progressbar as pb
+
 
 
 # download weather files using multiprocess
@@ -25,17 +27,15 @@ def worker(download_url):
     # remove all gzip files
     os.remove(r'data\{}'.format(filename_gz))
 
+    transform_filter_csv(filename_csv)
 
-def transform():
-    file_output = open("data\output\weather_temp.csv", "w")
-    # concat all csv files
-    for filename in glob.glob('data\*.csv'):
-        for line in open(filename):
-            file_output.write(line)
-    file_output.close()
 
-    # read weather_temp.csv file(concat of all downloaded csv files)
-    df_weather = pd.read_csv('data\output\weather_temp.csv', names =["weather_station_code","date","value_type","value","not_measured_1","not_measured_2","measure_unit","not_measured_3"])
+# transform and filter each downloaded csv file
+def transform_filter_csv(filename):
+    # read year.csv file
+    df_weather = pd.read_csv('data\{}'.format(filename),
+                             names=["weather_station_code", "date", "value_type", "value", "not_measured_1",
+                                    "not_measured_2", "measure_unit", "not_measured_3"])
 
     weather_station_code_to_country = {
         "EZE00100082": "CZ",
@@ -47,23 +47,48 @@ def transform():
     df_weather["country"] = df_weather.weather_station_code.map(weather_station_code_to_country)
     # select all Temperature minimums (TAVG value not available in 19th century of dataset)
     df_weather = df_weather[df_weather.value_type == "TMIN"]
+    # datetime conversion
+    df_weather['date'] = pd.to_datetime(df_weather['date'].astype(str), format='%Y-%m')
+    # select columns country,date and value
+    df_weather = df_weather[['country', 'date', 'value']]
+    # write to csv file
+    df_weather.to_csv(r'data\{}'.format(filename), sep=',', encoding='utf-8', index=False)
+
+
+def merge_csv():
+    file_output = open(r'data\output\weather.csv', "w")
+    # concat all csv files
+    for filename in glob.glob('data\*.csv'):
+        for line in open(filename):
+            file_output.write(line)
+    file_output.close()
+
+    # read weather_temp.csv file(concat of all downloaded csv files)
+    df_weather = pd.read_csv(r'data\output\weather.csv')
     # sort by date
     df_weather.sort_values(by=['date'])
-
-    df_weather['date'] = pd.to_datetime(df_weather['date'].astype(str), format='%Y-%m')
-
-    # select columns country,date and value
-    df_weather = df_weather[['country', 'date','value']]
     # write to csv file
     df_weather.to_csv(r'data\output\weather.csv', sep=',', encoding='utf-8', index=False)
 
-    # remove all gzip files
-    os.remove(r'data\output\weather_temp.csv')
+
+# removes all input and output csv files
+def clean_up_directory():
+    # remove all input files
+    input_files = glob.glob('data\*.csv')
+    for f in input_files:
+        os.remove(f)
+
+    # remove all output files
+    output_files = glob.glob('data\output\*.csv')
+    for f in output_files:
+        os.remove(f)
 
 if __name__ == '__main__':
-    start_year = 1820
-    end_year = 1821
-    extra_year = 1822
+    clean_up_directory()
+
+    start_year = 1802
+    end_year = 1820
+    extra_year = 1805
     # Weather data UI
     # print("----------------------------------------------------------------")
     # print("----------------------- WEATHER DATA ---------------------------")
@@ -86,6 +111,7 @@ if __name__ == '__main__':
     #     except ValueError:
     #         print("Oops!  That was no valid number.  Try again...")
 
+
     # build list of download urls
     url_download_list = [r'http://noaa-ghcn-pds.s3.amazonaws.com/csv.gz/{}.csv.gz'.format(year) for year in
                          range(start_year, end_year)]
@@ -98,9 +124,16 @@ if __name__ == '__main__':
         jobs.append(p)
         p.start()
 
-        # wait for workers to be finished
-        for job in jobs:
-            job.join()
+    # wait for workers to be finished
+    for job in jobs:
+        job.join()
+
+
+
+
+    merge_csv()
+
+    print("Script was executed succesfully :)")
 
     # aggregate functions on the weather data
-    transform()
+    # transform()
