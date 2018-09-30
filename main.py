@@ -45,7 +45,7 @@ def transform_filter_csv(filename):
     # select all Temperature minimums (TAVG value not available in 19th century of dataset)
     df_weather = df_weather[df_weather.value_type == "TMIN"]
     # datetime conversion
-    df_weather['date'] = pd.to_datetime(df_weather['date'].astype(str), format='%Y-%m')
+    df_weather['date'] = pd.to_datetime(df_weather['date'].astype(str), format='%Y-%m-%d')
     # select columns country,date and value
     df_weather = df_weather[['country', 'date', 'value']]
     # write to csv file
@@ -84,7 +84,7 @@ if __name__ == '__main__':
     clean_up_directory()
 
     start_year = 1802
-    end_year = 1820
+    end_year = 1805
     extra_year = 1805
     # Weather data UI
     # print("----------------------------------------------------------------")
@@ -126,5 +126,5 @@ if __name__ == '__main__':
 
     merge_csv()
 
-    print("Script was executed succesfully :)")
+    print("Script was executed successfully :)")
 
