@@ -7,7 +7,6 @@ import glob  # read all files from specific dir
 import pandas as pd
 
 
-
 # download weather files using multiprocess
 def worker(download_url):
     """thread worker function"""
@@ -27,7 +26,6 @@ def worker(download_url):
     os.remove(r'data\{}'.format(filename_gz))
 
     transform_filter_csv(filename_csv)
-
 
 # transform and filter each downloaded csv file
 def transform_filter_csv(filename):
@@ -110,7 +108,6 @@ if __name__ == '__main__':
     #     except ValueError:
     #         print("Oops!  That was no valid number.  Try again...")
 
-
     # build list of download urls
     url_download_list = [r'http://noaa-ghcn-pds.s3.amazonaws.com/csv.gz/{}.csv.gz'.format(year) for year in
                          range(start_year, end_year)]
@@ -127,12 +124,7 @@ if __name__ == '__main__':
     for job in jobs:
         job.join()
 
-
-
-
     merge_csv()
 
     print("Script was executed succesfully :)")
 
-    # aggregate functions on the weather data
-    # transform()
