@@ -5,7 +5,6 @@ import shutil
 import os
 import glob  # read all files from specific dir
 import pandas as pd
-import progressbar as pb
 
 
 
